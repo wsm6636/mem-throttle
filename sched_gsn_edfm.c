@@ -139,7 +139,7 @@ asmlinkage long sys_get_rt_task_param(pid_t pid, struct rt_task __user * param);
 extern int get_membudget(int get_cpu,int get_membudget);
 extern int get_master;
 extern int clean_budget(int g_cpu);
-extern int get_cur_budget(void);
+//extern int get_cur_budget(void);
 //extern int get_taskbudget;
 
 /* Uncomment this if you want to see all scheduling decisions in the

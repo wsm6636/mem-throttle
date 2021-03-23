@@ -82,7 +82,7 @@ static void memguard_process_overflow(struct irq_work *entry);
 static int throttle_thread(void *arg);
 int get_membudget(int get_cpu,int get_membudget);
 int get_cur_budget(void);
-int clean_budget(int g_cpu);
+//int clean_budget(int g_cpu);
 module_param(g_budget_max_bw, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
 MODULE_PARM_DESC(g_budget_max_bw, "maximum memory bandwidth (MB/s)");
 
@@ -153,11 +153,13 @@ int get_cur_budget(void){
 	put_online_cpus();	
 	return use;
 }*/
+/*
 int clean_budget(int g_cpu)
 {
 	smp_call_function_single(g_cpu,__update_curbudget,NULL,0);
 	return 0;
 }
+*/
 static void __start_throttle(void *info){
          struct core_info *cinfo = (struct core_info *)info;
          ktime_t start=ktime_get();
