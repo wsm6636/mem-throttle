@@ -81,8 +81,9 @@ static void period_timer_callback_slave(void *info);
 static void memguard_process_overflow(struct irq_work *entry);
 static int throttle_thread(void *arg);
 int get_membudget(int get_cpu,int get_membudget);
-int get_cur_budget(void);
+//int get_cur_budget(void);
 //int clean_budget(int g_cpu);
+int mem_ok(void);
 module_param(g_budget_max_bw, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
 MODULE_PARM_DESC(g_budget_max_bw, "maximum memory bandwidth (MB/s)");
 
@@ -160,6 +161,9 @@ int clean_budget(int g_cpu)
 	return 0;
 }
 */
+int mem_ok(){
+	
+}
 static void __start_throttle(void *info){
          struct core_info *cinfo = (struct core_info *)info;
          ktime_t start=ktime_get();

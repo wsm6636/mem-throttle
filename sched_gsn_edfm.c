@@ -388,11 +388,12 @@ static void check_for_preemptions(void)
 		task_params =task->rt_param.task_params;
 		sys_get_rt_task_param(task->pid,&task_params);	
 		TRACE_TASK(task,"check preempt membudget==%d\n",task_params.mem_budget_task);
-		
-//		get_membudget(last->cpu,task_params.mem_budget_task);		
+		task_param.ck_stop=1; //向任务发送停止信号
 
-		cur_budget=get_cur_budget();
-		TRACE_TASK(task, "get curbudget==%d\n", cur_budget);	
+		if(task_param.ck_stop_c==1){	//任务已停止
+//		get_membudget(last->cpu,task_params.mem_budget_task);		
+//		cur_budget=get_cur_budget();
+//		TRACE_TASK(task, "get curbudget==%d\n", cur_budget);	
 //		get_edf(last);
 		
 //		if(task_params.mem_budget_task>cur_budget){
@@ -408,11 +409,12 @@ static void check_for_preemptions(void)
 
 //		}else{
 			get_membudget(last->cpu,task_params.mem_budget_task);		
+		}
 			smp_mb();
                         link_task_to_cpu(task, last);
                         preempt(last);
-                }
-
+                
+		 }
 }
 
 /* gsnedf_job_arrival: task is either resumed or released */
