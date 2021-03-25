@@ -124,6 +124,7 @@ struct rt_task {
 	release_policy_t release_policy;
 	int		mem_budget_task;         /*rt-task memory budget*/
 	int     ck_stop;				/*rt-task stop*/
+	int     ck_stop_c;				/*rt-task stop check*/
 	int 	ck_begin;				/*rt-task begin*/
 
 };
