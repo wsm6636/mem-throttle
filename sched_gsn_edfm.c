@@ -408,13 +408,14 @@ static void check_for_preemptions(void)
 				,task_params.mem_budget_task,last->cur_budget);*/
 
 //		}else{
-			get_membudget(last->cpu,task_params.mem_budget_task);		
+			int mem_ok=get_membudget(last->cpu,task_params.mem_budget_task);		
 		}
 			smp_mb();
+			if(!mem_ok){   //确认memguard已经设置完成
                         link_task_to_cpu(task, last);
                         preempt(last);
-                
-		 }
+			}
+	}
 }
 
 /* gsnedf_job_arrival: task is either resumed or released */

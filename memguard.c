@@ -137,6 +137,7 @@ int get_membudget(int get_cpu,int get_membudget){
 	trace_printk("set cpu==%d,membudget==%d.\n",get_cpu,get_membudget);
 	return 0;
 }
+
 /*
 int get_cur_budget(void){
 //	smp_call_function_single(g_cpu,__update_curbudget,NULL,0);
@@ -161,9 +162,7 @@ int clean_budget(int g_cpu)
 	return 0;
 }
 */
-int mem_ok(){
-	
-}
+
 static void __start_throttle(void *info){
          struct core_info *cinfo = (struct core_info *)info;
          ktime_t start=ktime_get();
