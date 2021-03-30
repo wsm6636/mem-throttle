@@ -360,13 +360,14 @@ int main (int argc,char **argv)
                 printf("budget==%d\n",param.mem_budget_task);
         //ÔÝÍ£ÈÎÎñ£¿
         int ck_stop=param.ck_stop;
-        
+        printf("ck_stop==%d\n",ck_stop);
         if(ck_stop=1)//ÔÝÍ£
             param.ck_stop_ck=1;
             do
             {
-               Sleep(1000);
-               int ck_begin=param.ck_begin;
+//               Sleep(1000);
+                int ck_begin=param.ck_begin;
+                printf("ck_begin==%d\n",ck_begin);
             } while (ck_begin);
             
         else 
