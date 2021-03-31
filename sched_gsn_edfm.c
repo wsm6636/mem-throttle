@@ -337,7 +337,7 @@ static void check_for_preemptions(void)
 		task_param.ck_stop=1; //向任务发送停止信号
 
 //		if(task_param.ck_stop_c==1){	//任务已停止
-		TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_param.ck_stop_c);
+		TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_params.ck_stop_c);
 //		cur_budget=get_cur_budget();
 //		TRACE_TASK(task, "get curbudget==%d\n", cur_budget);
 //		get_edf(local);
@@ -398,7 +398,7 @@ static void check_for_preemptions(void)
 		task_param.ck_stop=1; //向任务发送停止信号
 
 //		if(task_param.ck_stop_c==1){	//任务已停止
-		TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_param.ck_stop_c);
+		TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_params.ck_stop_c);
 //		get_membudget(last->cpu,task_params.mem_budget_task);		
 //		cur_budget=get_cur_budget();
 //		TRACE_TASK(task, "get curbudget==%d\n", cur_budget);	
