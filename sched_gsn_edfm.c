@@ -360,6 +360,7 @@ static void check_for_preemptions(void)
 			smp_mb();
 			TRACE_TASK(task,"mem_ok=%d,memguard is ok \n",mem_ok);
 //			if(!mem_ok){   //确认memguard已经设置完成		
+			task_params.begin=1;
 			link_task_to_cpu(task, local);
 			preempt(local);
 		//	}

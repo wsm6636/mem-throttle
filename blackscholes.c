@@ -340,9 +340,8 @@ int bs_thread(void *tid_ptr) {
 int main (int argc,char **argv)
 {
 
-    
-	
 	int do_exit;
+    int ck_begin=0,ck_stop;
 	struct rt_task param;
 	printf("%d",PERIOD);
 	init_rt_task_param(&param);
@@ -359,18 +358,18 @@ int main (int argc,char **argv)
 		CALL(get_rt_task_param(gettid(),&param));
                 printf("budget==%d\n",param.mem_budget_task);
         //ÔÝÍ£ÈÎÎñ£¿
-        int ck_stop=param.ck_stop;
+       ck_stop=param.ck_stop;
         printf("ck_stop==%d\n",ck_stop);
-        if(ck_stop=1)//ÔÝÍ£
-            param.ck_stop_ck=1;
+        if(ck_stop=1){//ÔÝÍ£
+            param.ck_stop_c=1;
             do
             {
 //               Sleep(1000);
-                int ck_begin=param.ck_begin;
+                ck_begin=param.ck_begin;
                 printf("ck_begin==%d\n",ck_begin);
             } while (ck_begin);
-            
-        else 
+        }
+      
             do_exit=job(argc,argv);
 		sleep_next_period();
 	}while(!do_exit);
