@@ -366,7 +366,7 @@ int main (int argc,char **argv)
             {
 //               Sleep(1000);
                 ck_begin=param.ck_begin;
-                printf("ck_begin==%d\n",ck_begin);
+ //               printf("ck_begin==%d\n",ck_begin);
             } while (ck_begin);
         }
       
