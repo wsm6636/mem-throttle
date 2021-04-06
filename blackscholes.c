@@ -341,7 +341,7 @@ int main (int argc,char **argv)
 {
 
 	int do_exit;
-    int ck_begin=0,ck_stop;
+    int ck_begin,ck_stop;
 	struct rt_task param;
 	printf("%d",PERIOD);
 	init_rt_task_param(&param);
@@ -362,15 +362,17 @@ int main (int argc,char **argv)
         printf("ck_stop==%d\n",ck_stop);
         if(ck_stop=1){//ÔÝÍ£
             param.ck_stop_c=1;
+            set_rt_task_param(gettid(),&param);
             do
             {
-//               Sleep(1000);
-                ck_begin=param.ck_begin;
- //               printf("ck_begin==%d\n",ck_begin);
-            } while (ck_begin);
+                   Sleep(1000);
+                    get_rt_task_param(gettid(),&param);
+                    ck_begin=param.ck_begin;
+                    printf("ck_begin==%d\n",ck_begin);
+            } while (!ck_begin);
         }
       
-            do_exit=job(argc,argv);
+        do_exit=job(argc,argv);
 		sleep_next_period();
 	}while(!do_exit);
 	CALL(task_mode(BACKGROUND_TASK));
@@ -487,12 +489,7 @@ int job (int argc,char **argv){
     __parsec_roi_begin();
 #endif
 
-#ifdef ENABLE_THREADS
-#ifdef WIN32
-    HANDLE *threads;
-    int *nums;
-    threads = (HANDLE *) malloc (nThreads * sizeof(HANDLE));
-    nums = (int *) malloc (nThreads * sizeof(int));
+#ifdef ENABLE_THREADSlinux debug
 
     for(i=0; i<nThreads; i++) {
         nums[i] = i;
