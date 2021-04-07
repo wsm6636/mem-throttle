@@ -136,6 +136,7 @@ static rt_domain_t gsnedfm;
 #define gsnedfm_lock (gsnedfm.ready_lock)
 static void gsnedfm_task_block(struct task_struct *t);
 asmlinkage long sys_get_rt_task_param(pid_t pid, struct rt_task __user * param);
+asmlinkage long sys_set_rt_task_param(pid_t pid, struct rt_task __user * param);
 extern int get_membudget(int get_cpu,int get_membudget);
 extern int get_master;
 extern int clean_budget(int g_cpu);
@@ -334,9 +335,9 @@ static void check_for_preemptions(void)
 		sys_get_rt_task_param(task->pid,&task_params);	
 		TRACE_TASK(task,"check preempt membudget==%d\n",task_params.mem_budget_task);
 //		get_membudget(local->cpu,task_params.mem_budget_task);		
-		task_param.ck_stop=1; //向任务发送停止信号
-
-//		if(task_param.ck_stop_c==1){	//任务已停止
+		task_params.ck_stop=1; //\CF\F2\C8\CE\CE\F1\B7\A2\CB\CD停止\D0藕\C5
+		sys_set_rt_task_param(task->pid,&task_params);	
+//		if(task_param.ck_stop_c==1){	//\C8\CE\CE\F1\D2\D1停止
 		TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_params.ck_stop_c);
 //		cur_budget=get_cur_budget();
 //		TRACE_TASK(task, "get curbudget==%d\n", cur_budget);
@@ -359,8 +360,8 @@ static void check_for_preemptions(void)
 //		}
 			smp_mb();
 			TRACE_TASK(task,"mem_ok=%d,memguard is ok \n",mem_ok);
-//			if(!mem_ok){   //确认memguard已经设置完成		
-			task_params.begin=1;
+//			if(!mem_ok){   //确\C8\CFmemguard\D2丫\AD\C9\E8\D6\C3\CD\EA\B3\C9		
+			task_params.ck_begin=1;
 			sys_set_rt_task_param(task->pid,&task_params);	
 			link_task_to_cpu(task, local);
 			preempt(local);
@@ -397,9 +398,9 @@ static void check_for_preemptions(void)
 		task_params =task->rt_param.task_params;
 		sys_get_rt_task_param(task->pid,&task_params);	
 		TRACE_TASK(task,"check preempt membudget==%d\n",task_params.mem_budget_task);
-		task_param.ck_stop=1; //向任务发送停止信号
-
-//		if(task_param.ck_stop_c==1){	//任务已停止
+		task_params.ck_stop=1; //\CF\F2\C8\CE\CE\F1\B7\A2\CB\CD停止\D0藕\C5
+		sys_set_rt_task_param(task->pid,&task_params);	
+//		if(task_param.ck_stop_c==1){	//\C8\CE\CE\F1\D2\D1停止
 		TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_params.ck_stop_c);
 //		get_membudget(last->cpu,task_params.mem_budget_task);		
 //		cur_budget=get_cur_budget();
@@ -422,8 +423,8 @@ static void check_for_preemptions(void)
 //		}
 			smp_mb();
 			TRACE_TASK(task,"mem_ok=%d,memguard is ok \n",mem_ok);
-//			if(!mem_ok){   //确认memguard已经设置完成
-			task_params.begin=1;
+//			if(!mem_ok){   //确\C8\CFmemguard\D2丫\AD\C9\E8\D6\C3\CD\EA\B3\C9
+			task_params.ck_begin=1;
 			sys_set_rt_task_param(task->pid,&task_params);	
                         link_task_to_cpu(task, last);
                         preempt(last);
