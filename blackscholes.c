@@ -360,12 +360,12 @@ int main (int argc,char **argv)
         //ÔİÍ£ÈÎÎñ£¿
        ck_stop=param.ck_stop;
         printf("ck_stop==%d\n",ck_stop);
-        if(ck_stop=1){//ÔİÍ£
+        if(ck_stop){//ÔİÍ£
             param.ck_stop_c=1;
             set_rt_task_param(gettid(),&param);
             do
             {
-                   Sleep(1000);
+                   sleep(1);
                     get_rt_task_param(gettid(),&param);
                     ck_begin=param.ck_begin;
                     printf("ck_begin==%d\n",ck_begin);

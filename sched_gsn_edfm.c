@@ -592,6 +592,7 @@ static struct task_struct* gsnedfm_schedule(struct task_struct * prev)
 	    entry->linked != entry->scheduled) {
 		/* Schedule a linked job? */
 		if (entry->linked) {
+			
 			entry->linked->rt_param.scheduled_on = entry->cpu;
 			next = entry->linked;
 			TRACE_TASK(next, "scheduled_on = P%d\n", smp_processor_id());
