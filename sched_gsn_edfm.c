@@ -308,84 +308,54 @@ static cpu_entry_t* gsnedfm_get_nearest_available_cpu(cpu_entry_t *start)
 }
 #endif
 
+/*check memory bandwidth */
+static void check_memoriy_bandwidth(void)
+{
+	struct  task_struct  *task;
+	
+
+}
+
 /* check for any necessary preemptions */
 static void check_for_preemptions(void)
 {
 	struct task_struct *task;
 	cpu_entry_t *last;
-	struct rt_task task_params;
-	int cur_budget;
+
+
 #ifdef CONFIG_PREFER_LOCAL_LINKING
 	cpu_entry_t *local;
-	//get_edf();
+
 	/* Before linking to other CPUs, check first whether the local CPU is
 	 * idle. */
-	local = this_cpu_ptr(&gsnedfm_cpu_entries);
-	task  = __peek_ready(&gsnedfm);
+	local = this_cpu_ptr(&gsnedf_cpu_entries);
+	task  = __peek_ready(&gsnedf);
 
 	if (task && !local->linked
 #ifdef CONFIG_RELEASE_MASTER
-	    && likely(local->cpu != gsnedfm.release_master)
+	    && likely(local->cpu != gsnedf.release_master)
 #endif
-//	   && local->cpu!=get_master  
 		) {
-		task = __take_ready(&gsnedfm);
+		task = __take_ready(&gsnedf);
 		TRACE_TASK(task, "linking to local CPU %d to avoid IPI\n", local->cpu);
-		task_params =task->rt_param.task_params;
-		sys_get_rt_task_param(task->pid,&task_params);	
-		TRACE_TASK(task,"check preempt membudget==%d\n",task_params.mem_budget_task);
-//		get_membudget(local->cpu,task_params.mem_budget_task);		
-		task_params.ck_stop=1; //\CF\F2\C8\CE\CE\F1\B7\A2\CB\CDֹͣ\D0ź\C5
-		sys_set_rt_task_param(task->pid,&task_params);	
-//		if(task_param.ck_stop_c==1){	//\C8\CE\CE\F1\D2\D1ֹͣ
-		TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_params.ck_stop_c);
-//		cur_budget=get_cur_budget();
-//		TRACE_TASK(task, "get curbudget==%d\n", cur_budget);
-//		get_edf(local);
-		
-//		if(task_params.mem_budget_task>cur_budget){
-
-/*			smp_mb();
-			get_membudget(local->cpu,task_params.mem_budget_task);
-			TRACE_TASK(task,"task_budget%d>cur_budget%d\n"
-				,task_params.mem_budget_task,local->cur_budget);*/
-//			gsnedf_task_block(task);
-//			 TRACE_TASK(task, "task budget%d>cur_budget%d\n"
-//			,task_params.mem_budget_task, cur_budget);
-//			__add_release(&gsnedf, task);
-//			__add_ready(&gsnedf, task);
-
-//		}else{
-			int mem_ok=get_membudget(last->cpu,task_params.mem_budget_task);		
-//		}
-			smp_mb();
-			TRACE_TASK(task,"mem_ok=%d,memguard is ok \n",mem_ok);
-//			if(!mem_ok){   //ȷ\C8\CFmemguard\D2Ѿ\AD\C9\E8\D6\C3\CD\EA\B3\C9		
-			task_params.ck_begin=1;
-			sys_set_rt_task_param(task->pid,&task_params);	
-			link_task_to_cpu(task, local);
-			preempt(local);
-		//	}
-		}
-
-	
+		link_task_to_cpu(task, local);
+		preempt(local);
+	}
 #endif
 
 	for (last = lowest_prio_cpu();
-	     edf_preemption_needed(&gsnedfm, last->linked);
+	     edf_preemption_needed(&gsnedf, last->linked);
 	     last = lowest_prio_cpu()) {
-//&& last->cpu!=get_master
 		/* preemption necessary */
-//		smp_call_function_single(last->cpu,__get_edf,NULL,0);
-		task = __take_ready(&gsnedfm);
+		task = __take_ready(&gsnedf);
 		TRACE("check_for_preemptions: attempting to link task %d to %d\n",
 		      task->pid, last->cpu);
 
 #ifdef CONFIG_SCHED_CPU_AFFINITY
 		{
 			cpu_entry_t *affinity =
-					gsnedfm_get_nearest_available_cpu(
-						&per_cpu(gsnedfm_cpu_entries, task_cpu(task)));
+					gsnedf_get_nearest_available_cpu(
+						&per_cpu(gsnedf_cpu_entries, task_cpu(task)));
 			if (affinity)
 				last = affinity;
 			else if (requeue_preempted_job(last->linked))
@@ -395,40 +365,9 @@ static void check_for_preemptions(void)
 		if (requeue_preempted_job(last->linked))
 			requeue(last->linked);
 #endif
-		task_params =task->rt_param.task_params;
-		sys_get_rt_task_param(task->pid,&task_params);	
-		TRACE_TASK(task,"check preempt membudget==%d\n",task_params.mem_budget_task);
-		task_params.ck_stop=1; //\CF\F2\C8\CE\CE\F1\B7\A2\CB\CDֹͣ\D0ź\C5
-		sys_set_rt_task_param(task->pid,&task_params);	
-//		if(task_param.ck_stop_c==1){	//\C8\CE\CE\F1\D2\D1ֹͣ
-		TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_params.ck_stop_c);
-//		get_membudget(last->cpu,task_params.mem_budget_task);		
-//		cur_budget=get_cur_budget();
-//		TRACE_TASK(task, "get curbudget==%d\n", cur_budget);	
-//		get_edf(last);
-		
-//		if(task_params.mem_budget_task>cur_budget){
-//			gsnedf_task_block(task);
-//		        TRACE_TASK(task, "task budget%d>cur_budget%d\n"
-//			,task_params.mem_budget_task, cur_budget);				
-//			__add_release(&gsnedf, task);
-//			__add_ready(&gsnedf, task);	
-/*			smp_mb();		
-                        get_membudget(last->cpu,task_params.mem_budget_task);
-                	TRACE_TASK(task,"task_budget%d>cur_budget%d\n"
-				,task_params.mem_budget_task,last->cur_budget);*/
 
-//		}else{
-			int mem_ok=get_membudget(last->cpu,task_params.mem_budget_task);		
-//		}
-			smp_mb();
-			TRACE_TASK(task,"mem_ok=%d,memguard is ok \n",mem_ok);
-//			if(!mem_ok){   //ȷ\C8\CFmemguard\D2Ѿ\AD\C9\E8\D6\C3\CD\EA\B3\C9
-			task_params.ck_begin=1;
-			sys_set_rt_task_param(task->pid,&task_params);	
-                        link_task_to_cpu(task, last);
-                        preempt(last);
-//			}
+		link_task_to_cpu(task, last);
+		preempt(last);
 	}
 }
 
