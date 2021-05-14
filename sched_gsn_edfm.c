@@ -119,7 +119,7 @@ typedef struct  {
 	struct task_struct*	scheduled;	/* only RT tasks */
 	struct bheap_node*	hn;
 
-//	int 			cur_budget;    /* currently available budget */
+	int 			cur_budget;    /* currently available budget */
 //	int 			mem_master;	/* memguard master cpu*/
 //	int			task_budget;
 } cpu_entry_t;
@@ -140,7 +140,7 @@ asmlinkage long sys_set_rt_task_param(pid_t pid, struct rt_task __user * param);
 extern int get_membudget(int get_cpu,int get_membudget);
 extern int get_master;
 extern int clean_budget(int g_cpu);
-//extern int get_cur_budget(void);
+extern int get_cur_budget(void);
 //extern int get_taskbudget;
 
 /* Uncomment this if you want to see all scheduling decisions in the
@@ -316,7 +316,7 @@ static int check_memory_bandwidth(struct  task_struct  *task , cpu_entry_t *entr
 
 	struct rt_task task_params;
 	int cur_budget;
-	int ok;
+	int ok=0,mem_ok=1;
 
 	task_params = task->rt_param.task_params;
 	sys_get_rt_task_param(task->pid,&task_params);
@@ -328,10 +328,10 @@ static int check_memory_bandwidth(struct  task_struct  *task , cpu_entry_t *entr
 			TRACE_TASK(task,"task_budget%d>cur_budget%d\n",task_params.mem_budget_task,entry->cur_budget);
 			task_params.ck_stop=1;
 			sys_set_rt_task_param(task->pid,&task_params);
-			if(task_param.ck_stop_c==1){	
+			if(task_params.ck_stop_c==1){	
 			TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_params.ck_stop_c);
 			smp_mb();
-			int mem_ok=get_membudget(entry->cpu,task_params.mem_budget_task);
+			mem_ok=get_membudget(entry->cpu,task_params.mem_budget_task);
 			}		
 			smp_mb();
 			TRACE_TASK(task,"mem_ok=%d,memguard is ok \n",mem_ok);
@@ -342,7 +342,7 @@ static int check_memory_bandwidth(struct  task_struct  *task , cpu_entry_t *entr
 			}
 
 		}else TRACE_TASK(task,"task_budget%d<=cur_budget%d\n",task_params.mem_budget_task,entry->cur_budget);
-			break;
+			
 		
 	return ok;
 }
@@ -359,15 +359,15 @@ static void check_for_preemptions(void)
 
 	/* Before linking to other CPUs, check first whether the local CPU is
 	 * idle. */
-	local = this_cpu_ptr(&gsnedf_cpu_entries);
-	task  = __peek_ready(&gsnedf);
+	local = this_cpu_ptr(&gsnedfm_cpu_entries);
+	task  = __peek_ready(&gsnedfm);
 
 	if (task && !local->linked
 #ifdef CONFIG_RELEASE_MASTER
-	    && likely(local->cpu != gsnedf.release_master)
+	    && likely(local->cpu != gsnedfm.release_master)
 #endif
 		) {
-		task = __take_ready(&gsnedf);
+		task = __take_ready(&gsnedfm);
 		mem=check_memory_bandwidth(task , local);
 		if(mem==1){
 		TRACE_TASK(task, "linking to local CPU %d to avoid IPI\n", local->cpu);
@@ -378,18 +378,18 @@ static void check_for_preemptions(void)
 #endif
 
 	for (last = lowest_prio_cpu();
-	     edf_preemption_needed(&gsnedf, last->linked);
+	     edf_preemption_needed(&gsnedfm, last->linked);
 	     last = lowest_prio_cpu()) {
 		/* preemption necessary */
-		task = __take_ready(&gsnedf);
+		task = __take_ready(&gsnedfm);
 		TRACE("check_for_preemptions: attempting to link task %d to %d\n",
 		      task->pid, last->cpu);
 
 #ifdef CONFIG_SCHED_CPU_AFFINITY
 		{
 			cpu_entry_t *affinity =
-					gsnedf_get_nearest_available_cpu(
-						&per_cpu(gsnedf_cpu_entries, task_cpu(task)));
+					gsnedfm_get_nearest_available_cpu(
+						&per_cpu(gsnedfm_cpu_entries, task_cpu(task)));
 			if (affinity)
 				last = affinity;
 			else if (requeue_preempted_job(last->linked))
