@@ -309,11 +309,42 @@ static cpu_entry_t* gsnedfm_get_nearest_available_cpu(cpu_entry_t *start)
 #endif
 
 /*check memory bandwidth */
-static void check_memoriy_bandwidth(void)
+//输入值为当前任务，当前任务所在cpu
+//检查任务所需内存带宽是否够用，是否已经分配内存带宽
+static int check_memory_bandwidth(struct  task_struct  *task , cpu_entry_t *entry)
 {
-	struct  task_struct  *task;
-	
 
+	struct rt_task task_params;
+	int cur_budget;
+	int ok;
+
+	task_params = task->rt_param.task_params;
+	sys_get_rt_task_param(task->pid,&task_params);
+	TRACE_TASK(task,"check preempt membudget==%d\n",task_params.mem_budget_task);
+	
+		cur_budget=get_cur_budget();
+		TRACE_TASK(task, "get curbudget==%d\n", cur_budget);
+		if(task_params.mem_budget_task>cur_budget){
+			TRACE_TASK(task,"task_budget%d>cur_budget%d\n",task_params.mem_budget_task,entry->cur_budget);
+			task_params.ck_stop=1;
+			sys_set_rt_task_param(task->pid,&task_params);
+			if(task_param.ck_stop_c==1){	
+			TRACE_TASK(task,"ck_stop_c==%d,rt-task stop\n",task_params.ck_stop_c);
+			smp_mb();
+			int mem_ok=get_membudget(entry->cpu,task_params.mem_budget_task);
+			}		
+			smp_mb();
+			TRACE_TASK(task,"mem_ok=%d,memguard is ok \n",mem_ok);
+			if(!mem_ok){   	
+			task_params.ck_begin=1;
+			sys_set_rt_task_param(task->pid,&task_params);	
+			ok = 1;
+			}
+
+		}else TRACE_TASK(task,"task_budget%d<=cur_budget%d\n",task_params.mem_budget_task,entry->cur_budget);
+			break;
+		
+	return ok;
 }
 
 /* check for any necessary preemptions */
@@ -321,7 +352,7 @@ static void check_for_preemptions(void)
 {
 	struct task_struct *task;
 	cpu_entry_t *last;
-
+	int mem=0;
 
 #ifdef CONFIG_PREFER_LOCAL_LINKING
 	cpu_entry_t *local;
@@ -337,9 +368,12 @@ static void check_for_preemptions(void)
 #endif
 		) {
 		task = __take_ready(&gsnedf);
+		mem=check_memory_bandwidth(task , local);
+		if(mem==1){
 		TRACE_TASK(task, "linking to local CPU %d to avoid IPI\n", local->cpu);
 		link_task_to_cpu(task, local);
 		preempt(local);
+		}
 	}
 #endif
 
@@ -365,9 +399,11 @@ static void check_for_preemptions(void)
 		if (requeue_preempted_job(last->linked))
 			requeue(last->linked);
 #endif
-
+		mem=check_memory_bandwidth(task , last);
+		if(mem==1){
 		link_task_to_cpu(task, last);
 		preempt(last);
+		}
 	}
 }
 

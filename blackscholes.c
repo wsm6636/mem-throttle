@@ -357,19 +357,19 @@ int main (int argc,char **argv)
 		
 		CALL(get_rt_task_param(gettid(),&param));
                 printf("budget==%d\n",param.mem_budget_task);
-        //ÔİÍ£ÈÎÎñ£¿
+      
        ck_stop=param.ck_stop;
         printf("ck_stop==%d\n",ck_stop);
-        if(ck_stop){//ÔİÍ£
+        if(ck_stop){
             param.ck_stop_c=1;
             set_rt_task_param(gettid(),&param);
             do
             {
                    sleep(1);
                     get_rt_task_param(gettid(),&param);
-                    ck_begin=param.ck_begin;
-                    printf("ck_begin==%d\n",ck_begin);
+                    ck_begin=param.ck_begin;                   
             } while (!ck_begin);
+             printf("ck_begin==%d\n",ck_begin);
         }
       
         do_exit=job(argc,argv);
