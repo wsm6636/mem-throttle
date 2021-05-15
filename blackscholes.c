@@ -341,9 +341,9 @@ int main (int argc,char **argv)
 {
 
 	int do_exit;
-    int ck_begin,ck_stop;
+    int ck_begin=0,ck_stop=0;
 	struct rt_task param;
-	printf("%d",PERIOD);
+	printf("%d\n",PERIOD);
 	init_rt_task_param(&param);
 	param.period=PERIOD;
 	param.exec_cost=EXEC_COST;
@@ -356,23 +356,33 @@ int main (int argc,char **argv)
 	do{
 		
 		CALL(get_rt_task_param(gettid(),&param));
-                printf("budget==%d\n",param.mem_budget_task);
-      
-       ck_stop=param.ck_stop;
+        printf("budget==%d\n",param.mem_budget_task);   
+        printf("id=%d\n",gettid());  
+        ck_stop=param.ck_stop;
+        ck_begin=param.ck_begin;
+        for(;ck_stop==1;){
+        ck_stop=param.ck_stop;
         printf("ck_stop==%d\n",ck_stop);
-        if(ck_stop){
+        if(ck_stop==1){
             param.ck_stop_c=1;
             set_rt_task_param(gettid(),&param);
-            do
-            {
-                   sleep(1);
+//            do
+//            {
+//                   sleep(1);
+            for(;ck_begin==1;){
                     get_rt_task_param(gettid(),&param);
-                    ck_begin=param.ck_begin;                   
-            } while (!ck_begin);
-             printf("ck_begin==%d\n",ck_begin);
+                    ck_begin=param.ck_begin;  
+                    printf("ck_begin==%d\n",ck_begin);
+                    if(ck_begin==1){
+                    do_exit=job(argc,argv);                 
+                    }else continue;
+                }
+
+//            } while (!ck_begin);
+              printf("ck_begin==%d\n",ck_begin);
+            }else continue;
         }
-      
-        do_exit=job(argc,argv);
+//        do_exit=job(argc,argv);
 		sleep_next_period();
 	}while(!do_exit);
 	CALL(task_mode(BACKGROUND_TASK));
