@@ -315,7 +315,7 @@ static int check_memory_bandwidth(struct  task_struct  *task , cpu_entry_t *entr
 {
 
 	struct rt_task task_params;
-	int cur_budget;
+	int cur_budget=0;
 	int ok=0,mem_ok=1;
 
 	task_params = task->rt_param.task_params;
@@ -373,7 +373,8 @@ static void check_for_preemptions(void)
 		TRACE_TASK(task, "linking to local CPU %d to avoid IPI\n", local->cpu);
 		link_task_to_cpu(task, local);
 		preempt(local);
-		}
+		}else TRACE_TASK(task, "mem=%d,check_memory_bandwidth id fail", mem);
+		
 	}
 #endif
 
@@ -403,7 +404,7 @@ static void check_for_preemptions(void)
 		if(mem==1){
 		link_task_to_cpu(task, last);
 		preempt(last);
-		}
+		}else TRACE_TASK(task, "mem=%d,check_memory_bandwidth id fail", mem);
 	}
 }
 
